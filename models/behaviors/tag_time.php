@@ -11,6 +11,7 @@ class TagTimeBehavior extends ModelBehavior {
 		$default = array(
 			'assoc_model' => 'Tag',
 			'tag_field' => 'tag',
+			'separator' => ',',
 		);
 
 		if (!isset($this->settings[$Model->alias])) {
@@ -35,7 +36,7 @@ class TagTimeBehavior extends ModelBehavior {
 
 	function _getTagIds(&$Model) {
 		extract($this->settings[$Model->alias]);
-		$tags = explode(',', $Model->data[$Model->alias][Inflector::pluralize($tag_field)]);
+		$tags = explode($separator, $Model->data[$Model->alias][Inflector::pluralize($tag_field)]);
 
 		if (Set::filter($tags)) {
 			foreach ($tags as $tag) {
