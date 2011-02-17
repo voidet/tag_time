@@ -39,6 +39,7 @@ class TagTimeBehavior extends ModelBehavior {
 		$tags = explode($separator, $Model->data[$Model->alias][Inflector::pluralize($tag_field)]);
 
 		if (Set::filter($tags)) {
+			$tagIds = array();
 			foreach ($tags as $tag) {
 				$tag = strtolower(trim($tag));
 				$existingTag = $Model->{$assoc_model}->find('first', array(
@@ -47,14 +48,15 @@ class TagTimeBehavior extends ModelBehavior {
 				));
 
 				if (empty($existingTag)) {
+					$Model->{$assoc_model}->id = null;
 					$Model->{$assoc_model}->saveField($tag_field, $tag);
 					$tagIds[] = $Model->{$assoc_model}->id;
 				} else {
 					$tagIds[] = $existingTag[$assoc_model]['id'];
 				}
 			}
+			return array_unique($tagIds);
 		}
-		return array_unique($tagIds);
 	}
 
 }
