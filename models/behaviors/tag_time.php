@@ -26,7 +26,7 @@ class TagTimeBehavior extends ModelBehavior {
 		extract($this->settings[$Model->alias]);
 
 		if (!empty($tagIds)) {
-			foreach($tagIds as $tagId) {
+			foreach($tagIds as $key => $tagId) {
 				$Model->data[$assoc_model][$assoc_model][] = $tagId;
 			}
 		}
@@ -41,24 +41,20 @@ class TagTimeBehavior extends ModelBehavior {
 		if (Set::filter($tags)) {
 			foreach ($tags as $tag) {
 				$tag = strtolower(trim($tag));
-
 				$existingTag = $Model->{$assoc_model}->find('first', array(
 					'conditions' => array($assoc_model.'.'.$tag_field => $tag),
 					'recursive' => -1
 				));
 
-				if (!$existingTag) {
+				if (empty($existingTag)) {
 					$Model->{$assoc_model}->saveField($tag_field, $tag);
 					$tagIds[] = $Model->{$assoc_model}->id;
 				} else {
 					$tagIds[] = $existingTag[$assoc_model]['id'];
 				}
 			}
-
-			return array_unique($tagIds);
 		}
+		return array_unique($tagIds);
 	}
 
 }
-
-?>
