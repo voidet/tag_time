@@ -11,6 +11,7 @@ class TagTimeBehavior extends ModelBehavior {
 		$default = array(
 			'assoc_classname' => 'Tag',
 			'tag_field' => 'tag',
+			'form_field' => 'tags',
 			'separator' => ',',
 		);
 
@@ -19,6 +20,21 @@ class TagTimeBehavior extends ModelBehavior {
 		}
 
 		$this->settings = array_merge($this->settings, $default);
+	}
+
+	function afterFind(&$Model, $results, $primary = false) {
+		extract($this->settings);
+		foreach ($results as &$result) {
+			foreach ($Model->hasAndBelongsToMany as $assoc_key => $assoc_model) {
+				if (!empty($result[$assoc_key])) {
+					$tags = Set::extract('{n}.'.$tag_field, $result[$assoc_key]);
+					if (!empty($tags)) {
+						$result[$assoc_key][$form_field] = implode(',', $tags);
+					}
+				}
+			}
+		}
+		return $results;
 	}
 
 	function beforeSave(&$Model) {
@@ -33,18 +49,17 @@ class TagTimeBehavior extends ModelBehavior {
 			if ($assoc_model['className'] == $assoc_classname && !empty($tagIds)) {
 				foreach($tagIds as $key => $tagId) {
 					$Model->data[$assoc_key][$assoc_key][] = $tagId;
-					unset($Model->data[$assoc_key][Inflector::pluralize($tag_field)]);
+					unset($Model->data[$assoc_key][$form_field]);
 				}
 			}
 		}
-
     return parent::beforeSave($Model);
 	}
 
 	function _getTagIds($assoc_key, $assoc_model, &$Model) {
 
 		extract($this->settings);
-		$tags = explode($separator, $Model->data[$assoc_key][Inflector::pluralize($tag_field)]);
+		$tags = explode($separator, $Model->data[$assoc_key][$form_field]);
 
 		if (Set::filter($tags)) {
 			$tagIds = array();
