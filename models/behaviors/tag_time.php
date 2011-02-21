@@ -9,50 +9,58 @@ class TagTimeBehavior extends ModelBehavior {
 
 	function setup(&$Model, $settings = array()) {
 		$default = array(
-			'assoc_model' => 'Tag',
+			'assoc_classname' => 'Tag',
 			'tag_field' => 'tag',
 			'separator' => ',',
 		);
 
-		if (!isset($this->settings[$Model->alias])) {
-			$this->settings[$Model->alias] = $default;
+		if (!isset($this->settings)) {
+			$this->settings = $default;
 		}
 
-		$this->settings[$Model->alias] = array_merge($this->settings[$Model->alias], $settings);
+		$this->settings = array_merge($this->settings, $default);
 	}
 
 	function beforeSave(&$Model) {
-		$tagIds = $this->_getTagIds($Model);
-		extract($this->settings[$Model->alias]);
+		extract($this->settings);
 
-		if (!empty($tagIds)) {
-			foreach($tagIds as $key => $tagId) {
-				$Model->data[$assoc_model][$assoc_model][] = $tagId;
+		foreach ($Model->hasAndBelongsToMany as $assoc_key => $assoc_model) {
+			$tagIds = array();
+			if (!empty($Model->data[$assoc_key])) {
+				$tagIds = $this->_getTagIds($assoc_key, $assoc_model, $Model);
+			}
+
+			if ($assoc_model['className'] == $assoc_classname && !empty($tagIds)) {
+				foreach($tagIds as $key => $tagId) {
+					$Model->data[$assoc_key][$assoc_key][] = $tagId;
+					unset($Model->data[$assoc_key][Inflector::pluralize($tag_field)]);
+				}
 			}
 		}
 
     return parent::beforeSave($Model);
 	}
 
-	function _getTagIds(&$Model) {
-		extract($this->settings[$Model->alias]);
-		$tags = explode($separator, $Model->data[$Model->alias][Inflector::pluralize($tag_field)]);
+	function _getTagIds($assoc_key, $assoc_model, &$Model) {
+
+		extract($this->settings);
+		$tags = explode($separator, $Model->data[$assoc_key][Inflector::pluralize($tag_field)]);
 
 		if (Set::filter($tags)) {
 			$tagIds = array();
 			foreach ($tags as $tag) {
 				$tag = strtolower(trim($tag));
-				$existingTag = $Model->{$assoc_model}->find('first', array(
-					'conditions' => array($assoc_model.'.'.$tag_field => $tag),
+				$existingTag = $Model->{$assoc_key}->find('first', array(
+					'conditions' => array($assoc_key.'.'.$tag_field => $tag),
 					'recursive' => -1
 				));
 
 				if (empty($existingTag)) {
-					$Model->{$assoc_model}->id = null;
-					$Model->{$assoc_model}->saveField($tag_field, $tag);
-					$tagIds[] = $Model->{$assoc_model}->id;
+					$Model->{$assoc_key}->id = null;
+					$Model->{$assoc_key}->saveField($tag_field, $tag);
+					$tagIds[] = $Model->{$assoc_key}->id;
 				} else {
-					$tagIds[] = $existingTag[$assoc_model]['id'];
+					$tagIds[] = $existingTag[$assoc_key]['id'];
 				}
 			}
 			return array_unique($tagIds);
