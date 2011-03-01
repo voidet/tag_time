@@ -15,11 +15,11 @@ class TagTimeBehavior extends ModelBehavior {
 			'separator' => ',',
 		);
 
-		if (!isset($this->settings)) {
-			$this->settings = $default;
+		if (empty($settings)) {
+			$settings = $default;
 		}
 
-		$this->settings = array_merge($this->settings, $default);
+		$this->settings = array_merge($default, $settings);
 	}
 
 	function afterFind(&$Model, $results, $primary = false) {
