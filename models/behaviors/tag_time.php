@@ -24,11 +24,12 @@ class TagTimeBehavior extends ModelBehavior {
 
 	function afterFind(&$Model, $results, $primary = false) {
 		extract($this->settings);
-		foreach ($results as &$result) {
+		foreach ($results as $key => &$result) {
 			foreach ($Model->hasAndBelongsToMany as $assoc_key => $assoc_model) {
 				if (!empty($result[$assoc_key])) {
 					$tags = Set::extract('{n}.'.$tag_field, $result[$assoc_key]);
 					if (!empty($tags)) {
+						unset($results[$key][$assoc_key]);
 						$result[$assoc_key][$form_field] = implode(',', $tags);
 					}
 				}
@@ -37,19 +38,20 @@ class TagTimeBehavior extends ModelBehavior {
 		return $results;
 	}
 
-	function beforeSave(&$Model) {
+	function beforeValidate(&$Model) {
 		extract($this->settings);
-
 		foreach ($Model->hasAndBelongsToMany as $assoc_key => $assoc_model) {
 			$tagIds = array();
-			if (!empty($Model->data[$assoc_key])) {
-				$tagIds = $this->_getTagIds($assoc_key, $assoc_model, $Model);
-			}
+			if ($assoc_model['className'] == $assoc_classname) {
+				if (!empty($Model->data[$assoc_key])) {
+					$tagIds = $this->_getTagIds($assoc_key, $assoc_model, $Model);
+				}
 
-			if ($assoc_model['className'] == $assoc_classname && !empty($tagIds)) {
-				foreach($tagIds as $key => $tagId) {
-					$Model->data[$assoc_key][$assoc_key][] = $tagId;
-					unset($Model->data[$assoc_key][$form_field]);
+			 	if (!empty($tagIds)) {
+					foreach($tagIds as $key => $tagId) {
+						$Model->data[$assoc_key][$assoc_key][] = $tagId;
+						unset($Model->data[$assoc_key][$form_field]);
+					}
 				}
 			}
 		}
@@ -57,7 +59,6 @@ class TagTimeBehavior extends ModelBehavior {
 	}
 
 	function _getTagIds($assoc_key, $assoc_model, &$Model) {
-
 		extract($this->settings);
 		$tags = explode($separator, $Model->data[$assoc_key][$form_field]);
 
