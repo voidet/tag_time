@@ -26,7 +26,7 @@ class TagTimeBehavior extends ModelBehavior {
 		extract($this->settings);
 		foreach ($results as $key => &$result) {
 			foreach ($Model->hasAndBelongsToMany as $assoc_key => $assoc_model) {
-				if (!empty($result[$assoc_key])) {
+				if ($assoc_key == $assoc_classname && !empty($result[$assoc_key])) {
 					$tags = Set::extract('{n}.'.$tag_field, $result[$assoc_key]);
 					if (!empty($tags)) {
 						unset($results[$key][$assoc_key]);
