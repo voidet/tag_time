@@ -58,7 +58,7 @@ class TagTimeBehavior extends ModelBehavior {
 				}
 			}
 		}
-    return parent::beforeSave($Model);
+    return parent::beforeValidate($Model);
 	}
 
 	function _getTagIds($assoc_key, $assoc_model, &$Model) {
