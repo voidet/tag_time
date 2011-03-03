@@ -13,6 +13,7 @@ class TagTimeBehavior extends ModelBehavior {
 			'tag_field' => 'tag',
 			'form_field' => 'tags',
 			'separator' => ',',
+			'clear_model' => false,
 		);
 
 		if (empty($settings)) {
@@ -29,7 +30,9 @@ class TagTimeBehavior extends ModelBehavior {
 				if ($assoc_key == $assoc_classname && !empty($result[$assoc_key])) {
 					$tags = Set::extract('{n}.'.$tag_field, $result[$assoc_key]);
 					if (!empty($tags)) {
-						unset($results[$key][$assoc_key]);
+						if ($clear_model === true) {
+							unset($results[$key][$assoc_key]);
+						}
 						$result[$assoc_key][$form_field] = implode(',', $tags);
 					}
 				}
