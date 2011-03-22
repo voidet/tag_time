@@ -90,7 +90,7 @@
 				real_input: '#'+id,
 				holder: '#'+id+'_tagsinput',
 				input_wrapper: '#'+id+'_addTag',
-				fake_input: '#'+id+'_tag',
+				fake_input: '#'+id+'_tag'
 			},settings);
 
 
