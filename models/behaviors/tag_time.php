@@ -52,7 +52,7 @@ class TagTimeBehavior extends ModelBehavior {
 
 			 	if (!empty($tagIds)) {
 					foreach($tagIds as $key => $tagId) {
-						$Model->data[$assoc_key][][$assoc_model['associationForeignKey']] = $tagId;
+						$Model->data[$assoc_key][][$assoc_model['with']][$assoc_model['associationForeignKey']] = $tagId;
 						unset($Model->data[$assoc_key][$form_field]);
 					}
 				}
