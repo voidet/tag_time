@@ -25,15 +25,17 @@ class TagTimeBehavior extends ModelBehavior {
 
 	function afterFind(&$Model, $results, $primary = false) {
 		extract($this->settings);
-		foreach ($results as $key => &$result) {
-			foreach ($Model->hasAndBelongsToMany as $assoc_key => $assoc_model) {
-				if ($assoc_key == $assoc_classname && !empty($result[$assoc_key])) {
-					$tags = Set::extract('{n}.'.$tag_field, $result[$assoc_key]);
-					if (!empty($tags)) {
-						if ($clear_model === true) {
-							unset($results[$key][$assoc_key]);
+		if (!empty($results)) {
+			foreach ($results as $key => &$result) {
+				foreach ($Model->hasAndBelongsToMany as $assoc_key => $assoc_model) {
+					if ($assoc_key == $assoc_classname && !empty($result[$assoc_key])) {
+						$tags = Set::extract('{n}.'.$tag_field, $result[$assoc_key]);
+						if (!empty($tags)) {
+							if ($clear_model === true) {
+								unset($results[$key][$assoc_key]);
+							}
+							$result[$assoc_key][$form_field] = implode(',', $tags);
 						}
-						$result[$assoc_key][$form_field] = implode(',', $tags);
 					}
 				}
 			}
