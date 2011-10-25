@@ -11,7 +11,6 @@ class TagTimeBehavior extends ModelBehavior {
 		$default = array(
 			'assoc_classname' => 'Tag',
 			'tag_field' => 'tag',
-			'form_field' => 'tags',
 			'separator' => ',',
 			'clear_model' => false,
 		);
@@ -34,7 +33,7 @@ class TagTimeBehavior extends ModelBehavior {
 							if ($clear_model === true) {
 								unset($results[$key][$assoc_key]);
 							}
-							$result[$assoc_key][$form_field] = implode(',', $tags);
+							$result[$assoc_key][$assoc_key] = implode(',', $tags);
 						}
 					}
 				}
@@ -55,7 +54,7 @@ class TagTimeBehavior extends ModelBehavior {
 			 	if (!empty($tagIds)) {
 					foreach($tagIds as $key => $tagId) {
 						$Model->data[$assoc_key][][$assoc_model['with']][$assoc_model['associationForeignKey']] = $tagId;
-						unset($Model->data[$assoc_key][$form_field]);
+						unset($Model->data[$assoc_key][$assoc_key]);
 					}
 				}
 			}
@@ -64,8 +63,9 @@ class TagTimeBehavior extends ModelBehavior {
 	}
 
 	function _getTagIds($assoc_key, $assoc_model, &$Model) {
+
 		extract($this->settings);
-		$tags = explode($separator, $Model->data[$assoc_key][$form_field]);
+		$tags = explode($separator, $Model->data[$assoc_key][$assoc_key]);
 
 		if (Set::filter($tags)) {
 			$tagIds = array();

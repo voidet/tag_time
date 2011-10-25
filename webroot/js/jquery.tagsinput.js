@@ -14,7 +14,7 @@
 
 */
 
-(function($) {
+$(function() {
 
 	var delimiter = new Array();
 
@@ -191,4 +191,4 @@
 			}
 		};
 
-})(jQuery);
+});
