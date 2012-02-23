@@ -46,29 +46,34 @@ class TagTimeBehavior extends ModelBehavior {
 	function beforeValidate(&$Model) {
 		extract($this->settings);
 		foreach ($Model->hasAndBelongsToMany as $assoc_key => $assoc_model) {
+			if (empty($Model->data[$assoc_key][$form_field])) {
+				continue;
+			}
 			$tagIds = array();
 			if ($assoc_model['className'] == $assoc_classname) {
 				if (!empty($Model->data[$assoc_key])) {
-					$tagIds = $this->_getTagIds($assoc_key, $assoc_model, $Model);
+					$tagIds = $this->_getTags($Model, $assoc_key, $assoc_model);
 				}
-
 			 	if (!empty($tagIds)) {
-					foreach($tagIds as $key => $tagId) {
-						$Model->data[$assoc_key][][$assoc_model['with']][$assoc_model['associationForeignKey']] = $tagId;
-						unset($Model->data[$assoc_key][$form_field]);
+			 		foreach($tagIds as $key => &$value) {
+						$value[$assoc_model['with']][$assoc_model['associationForeignKey']] = $value[$assoc_key]['id'];
+						$Model->data[$assoc_key][$key] = $value;
 					}
+					unset($value);
+					unset($Model->data[$assoc_key][$form_field]);
 				}
 			}
 		}
     return parent::beforeValidate($Model);
 	}
 
-	function _getTagIds($assoc_key, $assoc_model, &$Model) {
+	function _getTags(&$Model, $assoc_key, $assoc_model) {
 		extract($this->settings);
 		$tags = explode($separator, $Model->data[$assoc_key][$form_field]);
 
 		if (Set::filter($tags)) {
 			$tagIds = array();
+			$tagData = array();
 			foreach ($tags as $tag) {
 				$tag = strtolower(trim($tag));
 				$existingTag = $Model->{$assoc_key}->find('first', array(
@@ -79,12 +84,15 @@ class TagTimeBehavior extends ModelBehavior {
 				if (empty($existingTag)) {
 					$Model->{$assoc_key}->id = null;
 					$Model->{$assoc_key}->saveField($tag_field, $tag);
-					$tagIds[] = $Model->{$assoc_key}->id;
-				} else {
+					$tagIds[] = $Model->{$assoc_key}->data[$assoc_key]['id'];
+					$tagData[] = $Model->{$assoc_key}->data;
+				} elseif (!in_array($existingTag[$assoc_key]['id'], $tagIds)) {
 					$tagIds[] = $existingTag[$assoc_key]['id'];
+					$tagData[] = $existingTag;
 				}
+
 			}
-			return array_unique($tagIds);
+			return $tagData;
 		}
 	}
 
