@@ -33,7 +33,7 @@ class TagTimeBehavior extends ModelBehavior {
 							if ($clear_model === true) {
 								unset($results[$key][$assoc_key]);
 							}
-							$result[$assoc_key][$assoc_key] = implode(',', $tags);
+							$result[$assoc_key][Inflector::pluralize($tag_field)] = implode(',', $tags);
 						}
 					}
 				}
@@ -65,7 +65,7 @@ class TagTimeBehavior extends ModelBehavior {
 	function _getTagIds($assoc_key, $assoc_model, &$Model) {
 
 		extract($this->settings);
-		$tags = explode($separator, $Model->data[$assoc_key][$assoc_key]);
+		$tags = explode($separator, $Model->data[$assoc_key][Inflector::pluralize($tag_field)]);
 
 		if (Set::filter($tags)) {
 			$tagIds = array();
